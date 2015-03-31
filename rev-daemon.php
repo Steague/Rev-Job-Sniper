@@ -9,22 +9,22 @@ require('./lib/mycurl.php');
 class rev
 {
     private static $_instance = null;
-    private $_twilioClient = null;
-    private $_config = null;
+    private $_twilioClient    = null;
+    private $_config          = null;
 
+    /**
+     * Setting up the Twilio APU and running the while loop (In checkJobs()).
+     */
     private function __construct()
     {
         $this->_config = include('config.php');
 
-        $sid = $this->_config['twilioSid']; // Your Account SID from www.twilio.com/user/account
+        $sid   = $this->_config['twilioSid']; // Your Account SID from www.twilio.com/user/account
         $token = $this->_config['twilioToken']; // Your Auth Token from www.twilio.com/user/account
 
         $this->_twilioClient = new Services_Twilio($sid, $token);
 
         $this->checkJobs();
-
-        // $jobsPage = file_get_contents('rev.1427832409.html');
-        // $this->revlog($this->getJobsFromPage($jobsPage));
     }
 
     // Making this a Singleton because we only want one instand of checkJobs() running at a time.
@@ -39,6 +39,13 @@ class rev
         return self::$_instance;
     }
 
+    /**
+     * Log helper method.
+     * 
+     * @param $msg String A message to be logged.
+     * @param $sms Boolean Whether or not to also SMS someone the message
+     * @return null
+     */
     public function revlog($msg, $sms = false)
     {
         $timestamp = "[".date("Y-m-d H:i:s")."]";
@@ -61,12 +68,18 @@ class rev
         }
     }
 
+    /**
+     * A method used to send messages to people via SMS.
+     *
+     * @param $msg String A message to be sent
+     * @return null
+     */
     protected function smsme($msg)
     {
         if ($this->_config['env'] === 'prod')
         {
             $message = $this->_twilioClient->account->messages->sendMessage(
-                $this->_config['twilioFromNumber'], // From a valid Twilio number
+                $this->_config['twilioFromNumber'],
                 $this->_config['twilioToNumber'],
                 $msg
             );
@@ -78,16 +91,21 @@ class rev
         }
     }
 
+    /**
+     * A parsing method for extracting job data from an HTML page.
+     * 
+     * @param $jobspage String An HTML string from the work page.
+     * @return Mixed Boolean: flase | Array: An array of jobs data
+     */
     protected function getJobsFromPage($jobspage)
     {
         try
         {
-            # Create a DOM parser object
+            // Create a DOM parser object
             $dom = new DOMDocument();
 
-            # Parse the HTML from Google.
-            # The @ before the method call suppresses any warnings that
-            # loadHTML might throw because of invalid HTML in the page.
+            // The @ before the method call suppresses any warnings that
+            // loadHTML might throw because of invalid HTML in the page.
             @$dom->loadHTML($jobspage);
 
             foreach($dom->getElementsByTagName('table') as $table)
@@ -128,6 +146,13 @@ class rev
         return false;
     }
 
+    /**
+     * A method used to determine the "best" jobs in order. Additionally skips
+     * jobs that don't match the given criteria.
+     *
+     * @param $allJobs Array An arry of jobs data from the getJobsFromPage Method.
+     * @return Array A single (best) item from all the jobs available.
+     */
     protected function getBestDesireableJob($allJobs)
     {
         $validJobs = array();
@@ -158,6 +183,12 @@ class rev
         return array_pop($validJobs);
     }
 
+    /**
+    * A method to accept a job.
+    *
+    * @param $jobspage String The jobs page HTML
+    * @return null
+    */
     protected function tryToGetJob($jobspage)
     {
         $allJobs = $this->getJobsFromPage($jobspage);
@@ -173,7 +204,6 @@ class rev
                 $this->revlog(str_pad($job["jobID"],16," ",STR_PAD_RIGHT)." | ".str_pad("$".$job["worth"],8," ",STR_PAD_LEFT)." | ".str_pad($job["jobLength"]."p",7," ",STR_PAD_LEFT)." | ".str_pad($job["jobTime"]."s",7," ",STR_PAD_LEFT));
             }
         }
-
 
         while ($allJobs !== false && is_array($allJobs) && !empty($allJobs))
         {
@@ -226,6 +256,11 @@ class rev
         $this->revlog("No ".$worthy."jobs to accept. Jobs: (".$jobCount.")");
     }
 
+    /**
+     * A method to curl and check for new jobs.
+     *
+     * @return null
+     */
     protected function checkJobs()
     {
         $rev = new revMyCurl($this->_config['revFindworkUrl']);
@@ -289,6 +324,9 @@ class rev
         }
     }
 
+    /**
+     * A helper comparison function used to order the jobs by worth
+     */
     static function cmp($a, $b)
     {
         if ($a["worth"] == $b["worth"]) {
@@ -297,6 +335,12 @@ class rev
         return ($a["worth"] < $b["worth"]) ? -1 : 1;
     }
 
+    /**
+     * A method to get a valid page count for jobs.
+     *
+     * @param $pCount String A human readable page count
+     * @return Integer An amount of pages associated with the job.
+     */
     protected function getPagesCount($pCount)
     {
         preg_match('/((?P<pages>\d+)p\s*)?/', (string)$pCount, $matches);
@@ -305,6 +349,12 @@ class rev
         return $totalpageCount;
     }
 
+    /**
+     * A method to get a valid job length for jobs.
+     *
+     * @param $time String A human readable length for the job
+     * @return Integer An amount of time in second associated with the job.
+     */
     protected function getTimeInSecs($time)
     {
         preg_match('/((?P<days>\d+)d\s*)?((?P<hours>\d+)h\s*)?((?P<minutes>\d+)m\s*)?((?P<seconds>\d+)s)?/', (string)$time, $matches);
