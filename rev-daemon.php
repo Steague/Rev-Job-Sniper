@@ -30,12 +30,10 @@ class rev
     // Making this a Singleton because we only want one instand of checkJobs() running at a time.
     public static function getInstance()
     {
-        if (self::$_instance === null)
+        if (!(self::$_instance instanceof self))
         {
-            $c = __CLASS__;
-            self::$_instance = new $c;
+            self::$_instance = new self;
         }
-
         return self::$_instance;
     }
 
