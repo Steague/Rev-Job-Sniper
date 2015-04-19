@@ -11,6 +11,7 @@ class mycurl
     protected $_post;
     protected $_postFields;
     protected $_referer ="http://www.google.com";
+    protected $_customHeaders = array('Except:');
 
     protected $_session;
     protected $_webpage;
@@ -77,6 +78,11 @@ class mycurl
         $this->_includeHeader = $includeHeader;
     }
 
+    public function setCustomHttpHeaders(array $headers)
+    {
+        $this->_customHeaders = $headers;
+    }
+
     public function createCurl($url = null)
     {
         if ($url !== null)
@@ -87,7 +93,7 @@ class mycurl
         $s = curl_init();
 
         curl_setopt($s,CURLOPT_URL,$this->_url);
-        curl_setopt($s,CURLOPT_HTTPHEADER,array('Expect:'));
+        curl_setopt($s,CURLOPT_HTTPHEADER,$this->_customHeaders);
         curl_setopt($s,CURLOPT_TIMEOUT,$this->_timeout);
         curl_setopt($s,CURLOPT_MAXREDIRS,$this->_maxRedirects);
         curl_setopt($s,CURLOPT_RETURNTRANSFER,true);
@@ -96,6 +102,7 @@ class mycurl
         curl_setopt($s,CURLOPT_COOKIEJAR,$this->_cookieFileLocation);
         curl_setopt($s,CURLOPT_COOKIEFILE,$this->_cookieFileLocation);
         curl_setopt($s,CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($s,CURLOPT_ENCODING , "");
 
         if ($this->authentication == 1)
         {

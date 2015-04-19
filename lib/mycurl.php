@@ -1,6 +1,6 @@
 <?php
 
-require('../vendor/mycurl.php');
+require('/vendor/mycurl.php');
 
 class revMyCurl extends mycurl
 {

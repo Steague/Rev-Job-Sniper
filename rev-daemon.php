@@ -89,6 +89,22 @@ class rev
         }
     }
 
+    // public function formatGetTimespan($n)
+    // {
+    //     $t = abs($n);
+    //     $i = floor($t / 1000);
+    //     $f = floor($t / 86400000);
+    //     $r = floor($t / 3600000);
+    //     $u = floor($t / 60000);
+    //     return array(
+    //         "mills" => ($t % 1000),
+    //         "days"  => $f,
+    //         "hrs"   => ($r % 24),
+    //         "min"   => ($u % 60),
+    //         "sec"   => ($i % 60)
+    //     );
+    // }
+
     /**
      * A parsing method for extracting job data from an HTML page.
      * 
@@ -97,51 +113,29 @@ class rev
      */
     protected function getJobsFromPage($jobspage)
     {
-        try
+        $jobsObject = json_decode($jobspage);
+
+        $jobMatches = array();
+        foreach ($jobsObject as $jobObject)
         {
-            // Create a DOM parser object
-            $dom = new DOMDocument();
-
-            // The @ before the method call suppresses any warnings that
-            // loadHTML might throw because of invalid HTML in the page.
-            @$dom->loadHTML($jobspage);
-
-            foreach($dom->getElementsByTagName('table') as $table)
+            // Make sure the word count is in multiples of 250
+            if (($jobObject->sizeInWords % 250) != 0)
             {
-                if ($table->getAttribute('class') == 'table orders sortable')
-                {
-                    $jobMatches = array();
-                    $i = 0;
-                    foreach($dom->getElementsByTagName('tr') as $tableRow)
-                    {
-                        //Skip the first (header) row
-                        if ($i < 1)
-                        {
-                            $i++;
-                            continue;
-                        }
-                        $jobData = explode("\n", trim($tableRow->textContent));
-                        $jobMatches[] = array(
-                            "jobID"     => (string)trim($jobData[0]),
-                            "worth"     => preg_replace("/[^0-9,.]/", "", (string)trim($jobData[5])),
-                            "jobLength" => $this->getPagesCount($jobData[3]),
-                            "jobTime"   => $this->getTimeInSecs($jobData[6])
-                        );
-                    }
-
-                    if (!empty($jobMatches))
-                    {
-                        return $jobMatches;
-                    }
-                }
+                continue;
             }
+
+            $jobLength = ($jobObject->sizeInWords / 250);
+            $jobTime = ($jobObject->timeLimit / 1000);
+
+            $jobMatches[] = array(
+                "jobID"     => (string)trim($jobObject->projectNumber),
+                "worth"     => preg_replace("/[^0-9,.]/", "", (string)trim($jobObject->payment->payTotal)),
+                "jobLength" => $jobLength,
+                "jobTime"   => $jobTime
+            );
         }
-        catch (Exception $e)
-        {
-            $this->revlog('Caught exception: '.$e->getMessage());
-            file_put_contents("rev.".time().".html", $jobspage);
-        }
-        return false;
+
+        return $jobMatches;
     }
 
     /**
@@ -191,10 +185,10 @@ class rev
     {
         $allJobs = $this->getJobsFromPage($jobspage);
 
-        $worthy = ($allJobs !== false && is_array($allJobs) && !empty($allJobs) ? "worthy " : "");
-        $jobCount = ($allJobs !== false && is_array($allJobs) && !empty($allJobs) ? count($allJobs) : 0);
+        $worthy = (is_array($allJobs) && !empty($allJobs) ? "worthy " : "");
+        $jobCount = (is_array($allJobs) && !empty($allJobs) ? count($allJobs) : 0);
 
-        if ($allJobs !== false && is_array($allJobs) && !empty($allJobs))
+        if (is_array($allJobs) && !empty($allJobs))
         {
             $this->revlog("ID               |    Worth |  Length |    Time");
             foreach ($allJobs as $job)
@@ -203,7 +197,7 @@ class rev
             }
         }
 
-        while ($allJobs !== false && is_array($allJobs) && !empty($allJobs))
+        while (is_array($allJobs) && !empty($allJobs))
         {
             $job = $this->getBestDesireableJob($allJobs);
 
@@ -262,6 +256,20 @@ class rev
     protected function checkJobs()
     {
         $rev = new revMyCurl($this->_config['revFindworkUrl']);
+        $rev->setCustomHttpHeaders(array(
+            'Expect:',
+            'Host: www.rev.com',
+            'Connection: keep-alive',
+            'Pragma: no-cache',
+            'Cache-Control: no-cache',
+            'Accept: application/json, text/javascript, */*; q=0.01',
+            'X-Requested-With: XMLHttpRequest',
+            'User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2351.3 Safari/537.36',
+            'Referer: https://www.rev.com/workspace/findwork',
+            'Accept-Encoding: gzip, deflate, sdch',
+            'Accept-Language: en-US,en;q=0.8'
+        ));
+        $rev->setIncludeHeader(false);
 
         $this->revlog("Initializing first page load.");
         while (true)
