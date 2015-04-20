@@ -102,7 +102,9 @@ class mycurl
         curl_setopt($s,CURLOPT_COOKIEJAR,$this->_cookieFileLocation);
         curl_setopt($s,CURLOPT_COOKIEFILE,$this->_cookieFileLocation);
         curl_setopt($s,CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($s,CURLOPT_ENCODING , "");
+        curl_setopt($s,CURLOPT_ENCODING,"");
+        curl_setopt($s,CURLOPT_CONNECTTIMEOUT,5); 
+        curl_setopt($s,CURLOPT_TIMEOUT,5); //timeout in seconds
 
         if ($this->authentication == 1)
         {
@@ -128,7 +130,6 @@ class mycurl
         curl_setopt($s,CURLOPT_REFERER,$this->_referer);
 
         $this->_webpage = curl_exec($s);
-        $this->_webpage = substr($this->_webpage, strpos($this->_webpage, "<!DOCTYPE html>"));
         $this->_status = curl_getinfo($s,CURLINFO_HTTP_CODE);
         curl_close($s);
     }

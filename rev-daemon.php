@@ -219,9 +219,9 @@ class rev
             $claim->setPost(array());
             $claim->setIncludeHeader(true);
             $claim->createCurl();
-            ob_start();
-            echo $claim;
-            $claimpage = ob_get_clean();
+
+            $claimpage = (string)$claim;
+
             $taken = (strpos($claimpage, "sorry, but project ".$job["jobID"]." is no longer available") !== false ? true : false);
             $error = (strpos($claimpage, "Internal Server Error") !== false ? true : false);
 
@@ -270,6 +270,9 @@ class rev
             'Accept-Language: en-US,en;q=0.8'
         ));
         $rev->setIncludeHeader(false);
+        $rev->createCurl();
+
+        $revpage = (string)$rev;
 
         $this->revlog("Initializing first page load.");
         while (true)
@@ -279,9 +282,17 @@ class rev
             {
                 $rev->createCurl();
 
-                ob_start();
-                echo $rev;
-                $revpage = ob_get_clean();
+                $revpage = (string)$rev;
+
+                if ($revpage === "" &&
+                    $rev->getHttpStatus() === 401)
+                {
+                    $this->revlog("Not authorized to view data, need to login.");
+                    $rev->loginToRev();
+                    sleep(5);
+                    continue;
+                }
+
             }
             catch (Exception $e)
             {
@@ -289,16 +300,6 @@ class rev
                 $this->revlog($rev);
                 $this->revlog($revpage);
                 sleep(30);
-                continue;
-            }
-
-            //check to see if I need to sign in
-            //<h1 class="home-title">Sign In</h1>
-            if (strpos($revpage, '<h1 class="home-title">Sign In</h1>'))
-            {
-                $this->revlog("Found sign in link. Need to login/update cookie.");
-                $rev->loginToRev();
-                sleep(5);
                 continue;
             }
 

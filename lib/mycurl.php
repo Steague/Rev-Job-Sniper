@@ -23,8 +23,6 @@ class revMyCurl extends mycurl
     {
         if (!is_string($this->_webpage))
         {
-            $rev = rev::getInstance();
-            $rev->revlog($this->_webpage);
             return "";
         }
         return $this->_webpage;
