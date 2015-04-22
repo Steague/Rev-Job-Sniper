@@ -113,7 +113,16 @@ class rev
      */
     protected function getJobsFromPage($jobspage)
     {
+        if (empty($jobspage))
+        {
+            return array();
+        }
         $jobsObject = json_decode($jobspage);
+
+        if (is_null($jobsObject))
+        {
+            return array();
+        }
 
         $jobMatches = array();
         foreach ($jobsObject as $jobObject)
