@@ -308,7 +308,7 @@ class rev
                 $this->revlog("Error when getting rev page.");
                 $this->revlog($rev);
                 $this->revlog($revpage);
-                sleep(30);
+                sleep(15);
                 continue;
             }
 
@@ -336,7 +336,7 @@ class rev
                 }
             }
 
-            sleep(30);
+            sleep(15);
         }
     }
 
