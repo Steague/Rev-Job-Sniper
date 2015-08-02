@@ -124,8 +124,13 @@ class rev
             return array();
         }
 
+        if (!property_exists($jobsObject, "newProjects"))
+        {
+            return array();
+        }
+
         $jobMatches = array();
-        foreach ($jobsObject as $jobObject)
+        foreach ($jobsObject->newProjects as $jobObject)
         {
             // Make sure the word count is in multiples of 250
             if (($jobObject->sizeInWords % 250) != 0)
@@ -133,7 +138,8 @@ class rev
                 continue;
             }
 
-            $jobLength = ($jobObject->sizeInWords / 250);
+            //$jobLength = ($jobObject->sizeInWords / 250);
+            $jobLength = $jobObject->sizeInPages;
             $jobTime = ($jobObject->timeLimit / 1000);
 
             $jobMatches[] = array(
@@ -163,16 +169,20 @@ class rev
         }
         foreach ($allJobs as $job)
         {
-            if ($job["jobLength"] < 4)
+            if ($job["jobLength"] < $this->_config['jobMinPageLength'])
             {
                 continue;
+            }
+            if ($job["jobLength"] > $this->_config['jobMaxPageLength'])
+            {
+                2;
             }
             $pricePerPage = $job["worth"] / $job["jobLength"];
-            if ($pricePerPage < 10)
+            if ($pricePerPage < $this->_config['jobMinWorthPerPage'])
             {
                 continue;
             }
-            if ($job["jobTime"] < 24)
+            if ($job["jobTime"] < $this->_config['jobMinHourLength'])
             {
                 continue;
             }
@@ -255,6 +265,13 @@ class rev
         }
 
         $this->revlog("No ".$worthy."jobs to accept. Jobs: (".$jobCount.")");
+        $this->revlog("Checking for new jobs in ".$this->_config['daemonDelaySeconds']." second".($this->_config['daemonDelaySeconds'] == 1 ? "" : "s"));
+    }
+
+    public function microsecs()
+    {
+        list($usec, $sec) = explode(" ", microtime());
+        return floor(((float)$usec + (float)$sec)*1000);
     }
 
     /**
@@ -266,22 +283,27 @@ class rev
     {
         $rev = new revMyCurl($this->_config['revFindworkUrl']);
         $rev->setCustomHttpHeaders(array(
-            'Expect:',
-            'Host: www.rev.com',
-            'Connection: keep-alive',
-            'Pragma: no-cache',
-            'Cache-Control: no-cache',
-            'Accept: application/json, text/javascript, */*; q=0.01',
-            'X-Requested-With: XMLHttpRequest',
-            'User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2351.3 Safari/537.36',
-            'Referer: https://www.rev.com/workspace/findwork',
-            'Accept-Encoding: gzip, deflate, sdch',
-            'Accept-Language: en-US,en;q=0.8'
+            'Accept:application/json, text/javascript, */*; q=0.01',
+            'Accept-Encoding:gzip, deflate',
+            'Accept-Language:en-US,en;q=0.8',
+            'Cache-Control:no-cache',
+            'Connection:keep-alive',
+            'Content-Length:54',
+            'Content-Type:application/json; charset=UTF-8',
+            'Host:www.rev.com',
+            'Origin:https://www.rev.com',
+            'Pragma:no-cache',
+            'Referer:https://www.rev.com/workspace/findwork',
+            'User-Agent:Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2383.0 Safari/537.36',
+            'X-Requested-With:XMLHttpRequest'
         ));
+        $payload = json_encode(array(
+            "currentProjectIds" => "[]",
+            "currentTime" => $this->microsecs()
+        ));
+        $rev->setPost($payload);
         $rev->setIncludeHeader(false);
         $rev->createCurl();
-
-        $revpage = (string)$rev;
 
         $this->revlog("Initializing first page load.");
         while (true)
@@ -336,7 +358,7 @@ class rev
                 }
             }
 
-            sleep(15);
+            sleep($this->_config['daemonDelaySeconds']);
         }
     }
 
