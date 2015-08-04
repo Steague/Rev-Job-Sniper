@@ -3,7 +3,7 @@
 class ConfigRev
 {
     private static $_instance = null;
-    private $_db             = null;
+    private $_db              = null;
     private $_config          = null;
 
     private function __construct()
@@ -19,17 +19,13 @@ class ConfigRev
 
         $this->_config = include('config.php');
 
-        $insert = "INSERT INTO config (key, value) VALUES(:key, :value)";
-        $stmt = $this->_db->prepare($insert);
-        $stmt->bindParam(':key', $key);
-        $stmt->bindParam(':value', $value);
-
         foreach ($this->_config as $k => $v)
         {
-            $key = $k;
-            $value = $v;
-
-            $stmt->execute();
+        	// Don't overwrite values currently set
+        	if (!$this->get($k))
+        	{
+            	$this->$k = $v;
+            }
         }
     }
 
@@ -56,6 +52,22 @@ class ConfigRev
         }
     }
 
+    public function getAll()
+    {
+    	$db = $this->_db;
+
+        $stmt = $db->prepare("SELECT * FROM config");
+
+        if (!$stmt->execute())
+        {
+            return null;
+        }
+
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $result;
+    }
+
     public function get($k)
     {
         $db = $this->_db;
@@ -80,17 +92,19 @@ class ConfigRev
             $get !== false)
         {
             $stmt = $db->prepare("UPDATE config SET value = ? WHERE key = ?");
+            echo "UPDATING ".$k." -> ".$v."\n";
         }
         else
         {
             $stmt = $db->prepare("INSERT INTO config (value, key) VALUES(?, ?)");
+            echo "INSERTING ".$k." -> ".$v."\n";
         }
         if (!$stmt->execute(array($v, $k)))
         {
             return false;
         }
 
-        return $stmt->execute();
+        return true;
     }
 
     public function __get($k)
