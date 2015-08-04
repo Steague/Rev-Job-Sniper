@@ -3,3 +3,5 @@ cookie.txt
 job-avail-grabber.php
 *.log
 *.html
+*.sqlite3
+test.php

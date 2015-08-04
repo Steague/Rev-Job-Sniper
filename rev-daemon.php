@@ -1,26 +1,27 @@
 <?php
 
 date_default_timezone_set('America/Los_Angeles');
-//error_reporting(E_ALL);
-//ini_set("display_errors", 1);
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
 require('./Services/Twilio.php');
 require('./lib/mycurl.php');
+require('./lib/configrev.php');
 
-class rev
+class Rev
 {
     private static $_instance = null;
     private $_twilioClient    = null;
     private $_config          = null;
 
     /**
-     * Setting up the Twilio APU and running the while loop (In checkJobs()).
+     * Setting up the Twilio API and running the while loop (In checkJobs()).
      */
     private function __construct()
     {
-        $this->_config = include('config.php');
+        $this->_config = ConfigRev::getInstance();
 
-        $sid   = $this->_config['twilioSid']; // Your Account SID from www.twilio.com/user/account
-        $token = $this->_config['twilioToken']; // Your Auth Token from www.twilio.com/user/account
+        $sid   = $this->_config->twilioSid; // Your Account SID from www.twilio.com/user/account
+        $token = $this->_config->twilioToken; // Your Auth Token from www.twilio.com/user/account
 
         $this->_twilioClient = new Services_Twilio($sid, $token);
 
@@ -74,11 +75,11 @@ class rev
      */
     protected function smsme($msg)
     {
-        if ($this->_config['env'] === 'prod')
+        if ($this->_config->env === 'prod')
         {
             $message = $this->_twilioClient->account->messages->sendMessage(
-                $this->_config['twilioFromNumber'],
-                $this->_config['twilioToNumber'],
+                $this->_config->twilioFromNumber,
+                $this->_config->twilioToNumber,
                 $msg
             );
             $this->revlog("Sent notification. SID: ".$message->sid.".");
@@ -169,20 +170,20 @@ class rev
         }
         foreach ($allJobs as $job)
         {
-            if ($job["jobLength"] < $this->_config['jobMinPageLength'])
+            if ($job["jobLength"] < $this->_config->jobMinPageLength)
             {
                 continue;
             }
-            if ($job["jobLength"] > $this->_config['jobMaxPageLength'])
+            if ($job["jobLength"] > $this->_config->jobMaxPageLength)
             {
                 2;
             }
             $pricePerPage = $job["worth"] / $job["jobLength"];
-            if ($pricePerPage < $this->_config['jobMinWorthPerPage'])
+            if ($pricePerPage < $this->_config->jobMinWorthPerPage)
             {
                 continue;
             }
-            if ($job["jobTime"] < $this->_config['jobMinHourLength'])
+            if ($job["jobTime"] < $this->_config->jobMinHourLength)
             {
                 continue;
             }
@@ -233,8 +234,8 @@ class rev
 
             $this->revlog("(".$job["jobID"].") Attempting to accept job.");
 
-            $claim = new revMyCurl($this->_config['revClaimUrl'].$job["jobID"]);
-            $claim->setReferer($this->_config['revClaimReferrerUrl'].$job["jobID"]);
+            $claim = new revMyCurl($this->_config->revClaimUrl.$job["jobID"]);
+            $claim->setReferer($this->_config->revClaimReferrerUrl.$job["jobID"]);
             $claim->setPost(array());
             $claim->setIncludeHeader(true);
             $claim->createCurl();
@@ -265,7 +266,7 @@ class rev
         }
 
         $this->revlog("No ".$worthy."jobs to accept. Jobs: (".$jobCount.")");
-        $this->revlog("Checking for new jobs in ".$this->_config['daemonDelaySeconds']." second".($this->_config['daemonDelaySeconds'] == 1 ? "" : "s"));
+        $this->revlog("Checking for new jobs in ".$this->_config->daemonDelaySeconds." second".($this->_config->daemonDelaySeconds == 1 ? "" : "s"));
     }
 
     public function microsecs()
@@ -281,7 +282,7 @@ class rev
      */
     protected function checkJobs()
     {
-        $rev = new revMyCurl($this->_config['revFindworkUrl']);
+        $rev = new revMyCurl($this->_config->revFindworkUrl);
         $rev->setCustomHttpHeaders(array(
             'Accept:application/json, text/javascript, */*; q=0.01',
             'Accept-Encoding:gzip, deflate',
@@ -344,7 +345,7 @@ class rev
             }
 
             // Keeping the keepalive script running (only for production)
-            if ($this->_config['env'] === 'prod')
+            if ($this->_config->env === 'prod')
             {
                 $output = "";
                 exec("ps auxwww|grep keepalive.php|grep -v grep", $output);
@@ -358,7 +359,7 @@ class rev
                 }
             }
 
-            sleep($this->_config['daemonDelaySeconds']);
+            sleep($this->_config->daemonDelaySeconds);
         }
     }
 
@@ -405,4 +406,4 @@ class rev
     }
 }
 
-$rev = rev::getInstance();
+$rev = Rev::getInstance();
