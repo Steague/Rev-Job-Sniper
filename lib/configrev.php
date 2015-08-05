@@ -104,7 +104,8 @@ class ConfigRev
 
         $get = $this->get($k);
         if ($get !== null &&
-            $get !== false)
+            $get !== false &&
+            $get != $v)
         {
             $stmt = $db->prepare("UPDATE config SET value = ? WHERE key = ?");
             echo "UPDATING ".$k." -> ".$v."<br />\n";
