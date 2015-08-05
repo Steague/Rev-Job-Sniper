@@ -29,7 +29,7 @@ class ConfigRev
 
     private function _openConnection()
     {
-    	if ($This->_db !== null)
+    	if ($this->_db !== null)
     	{
     		return;
     	}
