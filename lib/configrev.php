@@ -104,16 +104,18 @@ class ConfigRev
 
         $get = $this->get($k);
         if ($get !== null &&
-            $get !== false &&
-            $get != $v)
+            $get !== false)
         {
-            $stmt = $db->prepare("UPDATE config SET value = ? WHERE key = ?");
-            echo "UPDATING ".$k." -> ".$v."<br />\n";
+        	if ($get != $v)
+        	{
+	            $stmt = $db->prepare("UPDATE config SET value = ? WHERE key = ?");
+	            echo '<span class="alert">UPDATING '.$k.' -> '.$v."</span>\n";
+	        }
         }
         else
         {
             $stmt = $db->prepare("INSERT INTO config (value, key) VALUES(?, ?)");
-            echo "INSERTING ".$k." -> ".$v."<br />\n";
+            echo '<span class="alert">INSERTING '.$k.' -> '.$v."</span>\n";
         }
 
         if (!$stmt->execute(array($v, $k)))
