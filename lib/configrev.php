@@ -118,7 +118,8 @@ class ConfigRev
             echo '<span class="alert">INSERTING '.$k.' -> '.$v."</span>\n";
         }
 
-        if (!$stmt->execute(array($v, $k)))
+        if (isset($stmt) &&
+        	!$stmt->execute(array($v, $k)))
         {
         	$this->_closeConnection();
             return false;
