@@ -9,11 +9,7 @@ class ConfigRev
     private function __construct()
     {
         //
-        $this->_db = new PDO('sqlite:config.sqlite3');
-        $this->_db->setAttribute(
-            PDO::ATTR_ERRMODE,
-            PDO::ERRMODE_EXCEPTION
-        );
+        $this->_openConnection();
 
         $this->_db->exec("CREATE TABLE IF NOT EXISTS config (key STRING, value STRING)");
 
@@ -27,6 +23,26 @@ class ConfigRev
             	$this->$k = $v;
             }
         }
+
+		$this->_closeConnection();        
+    }
+
+    private function _openConnection()
+    {
+    	if ($This->_db !== null)
+    	{
+    		return;
+    	}
+    	$this->_db = new PDO('sqlite:config.sqlite3');
+        $this->_db->setAttribute(
+            PDO::ATTR_ERRMODE,
+            PDO::ERRMODE_EXCEPTION
+        );
+    }
+
+    private function _closeConnection()
+    {
+    	$this->_db = null;
     }
 
     public static function getInstance()
@@ -40,6 +56,7 @@ class ConfigRev
 
     public function printConfig()
     {
+    	$this->_openConnection();
         $db = $this->_db;
 
         $result = $db->query("SELECT * FROM config");
@@ -50,10 +67,12 @@ class ConfigRev
             echo "value: " . $row['value'] . "\n";
             echo "\n";
         }
+        $this->_closeConnection();
     }
 
     public function getAll()
     {
+    	$this->_openConnection();
     	$db = $this->_db;
 
         $stmt = $db->prepare("SELECT * FROM config");
@@ -64,12 +83,14 @@ class ConfigRev
         }
 
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $this->_closeConnection();
 
         return $result;
     }
 
     public function get($k)
     {
+    	$this->_openConnection();
         $db = $this->_db;
 
         $stmt = $db->prepare("SELECT * FROM config WHERE key = ?");
@@ -79,12 +100,14 @@ class ConfigRev
         }
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $this->_closeConnection();
 
         return $result["value"];
     }
 
     public function set($k, $v)
     {
+    	$this->_openConnection();
         $db = $this->_db;
 
         $get = $this->get($k);
@@ -99,10 +122,13 @@ class ConfigRev
             $stmt = $db->prepare("INSERT INTO config (value, key) VALUES(?, ?)");
             echo "INSERTING ".$k." -> ".$v."\n";
         }
+
         if (!$stmt->execute(array($v, $k)))
         {
+        	$this->_closeConnection();
             return false;
         }
+        $this->_closeConnection();
 
         return true;
     }
