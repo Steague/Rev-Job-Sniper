@@ -11,7 +11,7 @@ class ConfigRev
         //
         $this->_openConnection();
 
-        $this->_db->exec("CREATE TABLE IF NOT EXISTS config (key STRING, value STRING)");
+        $this->_db->exec("CREATE TABLE IF NOT EXISTS config (key varchar(255), value varchar(255))");
 
         $this->_config = include('config.php');
 
@@ -24,7 +24,6 @@ class ConfigRev
             }
         }
 
-		$this->_closeConnection();        
     }
 
     private function _openConnection()
@@ -56,7 +55,6 @@ class ConfigRev
 
     public function printConfig()
     {
-    	$this->_openConnection();
         $db = $this->_db;
 
         $result = $db->query("SELECT * FROM config");
@@ -67,12 +65,10 @@ class ConfigRev
             echo "value: " . $row['value'] . "\n";
             echo "\n";
         }
-        $this->_closeConnection();
     }
 
     public function getAll()
     {
-    	$this->_openConnection();
     	$db = $this->_db;
 
         $stmt = $db->prepare("SELECT * FROM config");
@@ -83,14 +79,12 @@ class ConfigRev
         }
 
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $this->_closeConnection();
 
         return $result;
     }
 
     public function get($k)
     {
-    	$this->_openConnection();
         $db = $this->_db;
 
         $stmt = $db->prepare("SELECT * FROM config WHERE key = ?");
@@ -100,14 +94,12 @@ class ConfigRev
         }
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $this->_closeConnection();
 
         return $result["value"];
     }
 
     public function set($k, $v)
     {
-    	$this->_openConnection();
         $db = $this->_db;
 
         $get = $this->get($k);
@@ -115,12 +107,12 @@ class ConfigRev
             $get !== false)
         {
             $stmt = $db->prepare("UPDATE config SET value = ? WHERE key = ?");
-            echo "UPDATING ".$k." -> ".$v."\n";
+            echo "UPDATING ".$k." -> ".$v."<br />\n";
         }
         else
         {
             $stmt = $db->prepare("INSERT INTO config (value, key) VALUES(?, ?)");
-            echo "INSERTING ".$k." -> ".$v."\n";
+            echo "INSERTING ".$k." -> ".$v."<br />\n";
         }
 
         if (!$stmt->execute(array($v, $k)))
@@ -128,7 +120,6 @@ class ConfigRev
         	$this->_closeConnection();
             return false;
         }
-        $this->_closeConnection();
 
         return true;
     }
