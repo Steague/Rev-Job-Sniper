@@ -109,13 +109,13 @@ class ConfigRev
         	if ($get != $v)
         	{
 	            $stmt = $db->prepare("UPDATE config SET value = ? WHERE key = ?");
-	            echo '<span class="alert">UPDATING '.$k.' -> '.$v."</span>\n";
+	            echo '<span class="alert alert-info">UPDATING '.$k.' -> '.$v."</span>\n";
 	        }
         }
         else
         {
             $stmt = $db->prepare("INSERT INTO config (value, key) VALUES(?, ?)");
-            echo '<span class="alert">INSERTING '.$k.' -> '.$v."</span>\n";
+            echo '<span class="alert alert-info">INSERTING '.$k.' -> '.$v."</span>\n";
         }
 
         if (isset($stmt) &&
