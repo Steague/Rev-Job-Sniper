@@ -176,14 +176,14 @@ class Rev
             }
             if ($job["jobLength"] > $this->_config->jobMaxPageLength)
             {
-                2;
+                continue;
             }
             $pricePerPage = $job["worth"] / $job["jobLength"];
             if ($pricePerPage < $this->_config->jobMinWorthPerPage)
             {
                 continue;
             }
-            if ($job["jobTime"] < $this->_config->jobMinHourLength)
+            if ($job["jobTime"] < ($this->_config->jobMinHourLength * 3600)
             {
                 continue;
             }
