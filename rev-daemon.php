@@ -183,7 +183,7 @@ class Rev
             {
                 continue;
             }
-            if ($job["jobTime"] < ($this->_config->jobMinHourLength * 3600)
+            if ($job["jobTime"] < ($this->_config->jobMinHourLength * 3600))
             {
                 continue;
             }
