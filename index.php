@@ -163,5 +163,30 @@ h1 {
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        initAPI();
+    });
+
+    function initAPI() {
+        $.getJSON("api.php?route=foo", function(data) {
+            if (data.hasOwnProperty("response") &&
+                data.response == "Invalid API call.") {
+                console.log("API Ready.");
+                startAPITick(5);
+            }
+        });
+    }
+
+    function startAPITick(secDelay) {
+        $.getJSON("api.php?route=lastRun", function(data) {
+            if (data.hasOwnProperty("response")) {
+                console.log("Last run", data.response);
+                $("#sniperRunAt").next('[name="sniperRunAt"]').value(data.response.readable);
+                setTimeout(startAPITick(secDelay), secDelay * 1000);
+            }
+        });
+    }
+    </script>
 </body>
 </html>
