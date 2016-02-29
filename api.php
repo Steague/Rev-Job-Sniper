@@ -38,6 +38,10 @@ switch ($apiRoute) {
                     "readable" => date ("F d Y H:i:s.", $filemtime)
                 )
             ));
+        } else {
+            echo json_encode(array(
+                "response" => "never"
+            ));
         }
         break;
     default:
