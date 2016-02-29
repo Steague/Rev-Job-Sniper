@@ -4,6 +4,8 @@ date_default_timezone_set('America/Los_Angeles');
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
+header('Content-Type: application/json');
+
 session_start();
 
 if ($_SESSION['pass'] != "5092ab784ba9643669c982ee084baef9d9d2979a2cc29cc64b69e27270602b52") {
@@ -25,6 +27,18 @@ switch ($apiRoute) {
         $mystring = "rev-daemon.php";
         exec("ps aux | grep '$mystring' | grep -v grep | awk '{ print $2 }' | head -1", $out);
         echo json_encode(array("response"=>$out[0]));
+        break;
+    case "lastRun":
+        $filename = 'rev-log.log';
+        if (file_exists($filename)) {
+            $filemtime = filemtime($filename);
+            echo json_encode(array(
+                "response" => array(
+                    "timestamp"=> $filemtime,
+                    "readable" => date ("F d Y H:i:s.", $filemtime)
+                )
+            ));
+        }
         break;
     default:
         echo json_encode(array("response"=>"Invalid API call."));
