@@ -183,7 +183,7 @@ h1 {
             if (data.hasOwnProperty("response")) {
                 console.log("Last run", data.response);
                 $("#sniperRunAt").next('[name="sniperRunAt"]').val(data.response.readable);
-                setTimeout(startAPITick(secDelay), secDelay * 1000);
+                setTimeout(function() { startAPITick(secDelay); }, secDelay * 1000);
             }
         });
     }
