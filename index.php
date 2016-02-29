@@ -182,7 +182,7 @@ h1 {
         $.getJSON("api.php?route=lastRun", function(data) {
             if (data.hasOwnProperty("response")) {
                 console.log("Last run", data.response);
-                $("#sniperRunAt").next('[name="sniperRunAt"]').value(data.response.readable);
+                $("#sniperRunAt").next('[name="sniperRunAt"]').val(data.response.readable);
                 setTimeout(startAPITick(secDelay), secDelay * 1000);
             }
         });
