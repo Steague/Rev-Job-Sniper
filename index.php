@@ -172,7 +172,6 @@ h1 {
         $.getJSON("api.php?route=foo", function(data) {
             if (data.hasOwnProperty("response") &&
                 data.response == "Invalid API call.") {
-                console.log("API Ready.");
                 startAPITick(5);
             }
         });
@@ -181,8 +180,7 @@ h1 {
     function startAPITick(secDelay) {
         $.getJSON("api.php?route=lastRun", function(data) {
             if (data.hasOwnProperty("response")) {
-                console.log("Last run", data.response);
-                $("#sniperRunAt").next('[name="sniperRunAt"]').val(data.response.readable);
+                $("#sniperRunAt").next('[name="sniperRunAt"]').val(data.response.readable+" ("+data.response.offset+" seconds ago.)");
                 setTimeout(function() { startAPITick(secDelay); }, secDelay * 1000);
             }
         });
