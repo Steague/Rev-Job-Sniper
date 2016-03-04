@@ -79,6 +79,9 @@ h1 {
 .form-control {
     width: 75%;
 }
+.botNotRunning {
+    display: none;
+}
 </style>
 </head>
 <body>
@@ -144,17 +147,13 @@ h1 {
                     <span class="input-group-addon" id="sniperRunAt">Sniper was last run at</span>
                     <input type="text" class="form-control" name="sniperRunAt" value="<?php echo date ("F d Y H:i:s.", filemtime($filename)); ?>" aria-describedby="sniperRunAt" disabled />
                 </div>
-                <?php
-                $mystring = "rev-daemon.php";
-                exec("ps aux | grep '$mystring' | grep -v grep | awk '{ print $2 }' | head -1", $out);
-                if ($out[0]) {
-                    ?>
-                    <div class="input-group">
-                        <span class="input-group-addon" id="sniperPID">Sniper PID is</span>
-                        <input type="text" class="form-control" name="sniperPID" value="<?php echo $out[0]; ?>" aria-describedby="sniperPID" disabled />
-                    </div>
-                    <?php
-                }
+                <div class="input-group">
+                    <span class="input-group-addon" id="sniperPID">Sniper PID is</span>
+                    <input type="text" class="form-control" name="sniperPID" value="" aria-describedby="sniperPID" disabled />
+                </div>
+                <button id="ctrlStopBot" class="butNotRunning" value="Stop Bot" /><br />
+                <button id="ctrlRestartBot" class="butNotRunning" value="Restart Bot" /><br />
+                <button id="ctrlStartBot" class="butNotRunning" value="Start Bot" /><br />
             } else {
                 echo "Sniper has never been run!";
             }
@@ -166,13 +165,60 @@ h1 {
     <script>
     $(document).ready(function() {
         initAPI();
+        initButtonEvents();
     });
+
+    function initButtonEvents() {
+        $("#ctrlStartBot").hide();
+        $("#ctrlStopBot").hide();
+        $("#ctrlRestartBot").hide();
+
+        $("#ctrlStopBot").click(function() {
+            $.getJSON("api.php?route=stopBot", function(data) {
+                getPid();
+                // respond to stop bot.
+            });
+        });
+
+        $("#ctrlRestartBot").click(function() {
+            $.getJSON("api.php?route=restartBot", function(data) {
+                getPid();
+                // respond to stop bot.
+            });
+        });
+
+        $("#ctrlStartBot").click(function() {
+            $.getJSON("api.php?route=startBot", function(data) {
+                getPid();
+                // respond to stop bot.
+            });
+        });
+    }
 
     function initAPI() {
         $.getJSON("api.php?route=foo", function(data) {
             if (data.hasOwnProperty("response") &&
                 data.response == "Invalid API call.") {
                 startAPITick(5);
+                getPid();
+            }
+        });
+    }
+
+    function getPid() {
+        $.getJSON("api.php?route=sniperPid", function(data) {
+            if (data.hasOwnProperty("response")) {
+                $("#sniperPID").next('[name="sniperPID"]').val(data.response);
+
+                if (data.response == "Bot not running") {
+                    $("#ctrlStartBot").show();
+                    $("#ctrlStopBot").hide();
+                    $("#ctrlRestartBot").hide();
+                } else {
+                    $("#ctrlStartBot").hide();
+                    $("#ctrlStopBot").show();
+                    $("#ctrlRestartBot").show();
+                }
             }
         });
     }
