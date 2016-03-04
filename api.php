@@ -26,7 +26,7 @@ switch ($apiRoute) {
     case "sniperPid":
         $mystring = "rev-daemon.php";
         exec("ps aux | grep '$mystring' | grep -v grep | awk '{ print $2 }' | head -1", $out);
-        if (is_numeric($out)) {
+        if (is_numeric($out[0])) {
             echo json_encode(array("response"=>$out[0]));
         } else {
             echo json_encode(array("response"=>"Bot not running"));
