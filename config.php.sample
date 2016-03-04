@@ -1,0 +1,25 @@
+<?php
+
+return array(
+	'env'                 => 'prod', // prod | dev
+
+	'twilioFromNumber'    => '1111111111',
+	'twilioToNumber'      => '1111111111',
+	'twilioSid'           => '123412324abcdabcd123412324abcdabcd',
+	'twilioToken'         => '123412324abcdabcd123412324abcdab',
+	
+	'revEmail'            => 'email@example.com',
+	'revPassword'         => 'myRev.comPassword',
+
+	'revLoginUrl'         => 'https://www.rev.com/account/login',
+	'revClaimUrl'         => 'https://www.rev.com/workspace/ClaimTranslation?projectNumber=',
+	'revClaimReferrerUrl' => 'https://www.rev.com/workspace/project/',
+	'revFindworkUrl'      => 'https://www.rev.com/workspace/findwork/tablecontent/translation',
+
+	'jobMinPageLength'    => 8,
+	'jobMaxPageLength'    => 20,
+	'jobMinWorthPerPage'  => 10,
+	'jobMinHourLength'    => 24,
+
+	'daemonDelaySeconds'  => 30,
+);
