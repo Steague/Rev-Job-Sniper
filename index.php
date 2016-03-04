@@ -164,10 +164,17 @@ h1 {
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
     <script>
+    var socket;
     $(document).ready(function() {
         initAPI();
         initButtonEvents();
+        socket = io.connect('zentits.com:8000');
+
+        socket.on('notification', function(data) {
+            console.log("socket io got a notification!", data);
+        });
     });
 
     function initButtonEvents() {
