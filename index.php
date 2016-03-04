@@ -151,13 +151,15 @@ h1 {
                     <span class="input-group-addon" id="sniperPID">Sniper PID is</span>
                     <input type="text" class="form-control" name="sniperPID" value="" aria-describedby="sniperPID" disabled />
                 </div>
-                <button id="ctrlStopBot" class="butNotRunning" value="Stop Bot" /><br />
-                <button id="ctrlRestartBot" class="butNotRunning" value="Restart Bot" /><br />
-                <button id="ctrlStartBot" class="butNotRunning" value="Start Bot" /><br />
+                <?php
             } else {
                 echo "Sniper has never been run!";
             }
             ?>
+            <h1>Sniper Controls</h1>
+            <button id="ctrlStopBot" class="butNotRunning" value="Stop Bot" /><br />
+            <button id="ctrlRestartBot" class="butNotRunning" value="Restart Bot" /><br />
+            <button id="ctrlStartBot" class="butNotRunning" value="Start Bot" /><br />
         </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
