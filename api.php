@@ -35,7 +35,8 @@ switch ($apiRoute) {
             echo json_encode(array(
                 "response" => array(
                     "timestamp"=> $filemtime,
-                    "readable" => date ("F d Y H:i:s.", $filemtime)
+                    "readable" => date ("F d Y H:i:s.", $filemtime),
+                    "offset"   => max(0,(time()-$filemtime))
                 )
             ));
         } else {
