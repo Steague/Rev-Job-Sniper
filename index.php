@@ -159,7 +159,7 @@ h1 {
             <h1>Sniper Controls</h1>
             <button id="ctrlStopBot" class="butNotRunning">Stop Bot</button><br />
             <button id="ctrlRestartBot" class="butNotRunning">Restart Bot</button><br />
-            <button id="ctrlStartBot" class="butNotRunning">Start Bot"</button><br />
+            <button id="ctrlStartBot" class="butNotRunning">Start Bot</button><br />
         </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
