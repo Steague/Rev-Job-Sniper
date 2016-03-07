@@ -209,7 +209,7 @@ class Rev
         $pattern = '/<input name="__RequestVerificationToken" type="hidden" value="([a-zA-Z0-9-_]+)"/';
         preg_match($pattern, $jobPage, $matches);
 
-        if (!$matches[1])
+        if (count($matches) != 2 || !$matches[1])
         {
             return null;
         }
