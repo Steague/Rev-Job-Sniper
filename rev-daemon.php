@@ -196,6 +196,37 @@ class Rev
     }
 
     /**
+    * A method to get the __RequestVerificationToken value from the job claim page
+    *
+    * @return requestVerificationToken || null
+    */
+    protected function getRequestVerificationToken()
+    {
+        $jobPageCurl = new revMyCurl($this->_config->revClaimReferrerUrl.$job["jobID"])->createCurl();
+        $jobPage = (string)$jobPageCurl;
+        
+        $dom = new DomDocument();
+        $dom->loadHTML($jobPage);
+
+        $form = $dom->getElementById("claim-form");
+        $node = $form->firstChild;
+        $requestVerificationToken = null;
+        while (gettype($node) == "object")
+        {
+            if ($node->getAttribute('name') != "__RequestVerificationToken")
+            {
+                $node = $node->nextSibling;
+                continue;
+            }
+
+            $requestVerificationToken = $node->getAttribute('value');
+            break;
+        }
+
+        return $requestVerificationToken;
+    }
+
+    /**
     * A method to accept a job.
     *
     * @param $jobspage String The jobs page HTML
@@ -232,11 +263,21 @@ class Rev
                 continue;
             }
 
+            $this->revlog("(".$job["jobID"].") Attempting to get request verification token.");
+            $requestVerificationToken = $this->getRequestVerificationToken();
+
+            if ($requestVerificationToken === null)
+            {
+                $this->revlog("(".$job["jobID"].") Unable to get request verification token. Aborting.");
+            }
+
             $this->revlog("(".$job["jobID"].") Attempting to accept job.");
 
             $claim = new revMyCurl($this->_config->revClaimUrl.$job["jobID"]);
             $claim->setReferer($this->_config->revClaimReferrerUrl.$job["jobID"]);
-            $claim->setPost(array());
+            $claim->setPost(array(
+                "__RequestVerificationToken" => $requestVerificationToken
+            ));
             $claim->setIncludeHeader(true);
             $claim->createCurl();
 
