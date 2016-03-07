@@ -135,7 +135,7 @@ function handler(req, res) {
 
 // creating a new websocket to keep the content updated without any AJAX request
 io.sockets.on('connection', function(socket) {
-    console.log(__dirname, socket);
+    console.log(__dirname);
     // watching the log file
     fs.watchFile(__dirname + '/rev-log.log', function(curr, prev) {
         // on file change we can read the new log

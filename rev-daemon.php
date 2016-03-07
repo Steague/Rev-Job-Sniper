@@ -200,7 +200,7 @@ class Rev
     *
     * @return requestVerificationToken || null
     */
-    protected function getRequestVerificationToken()
+    protected function getRequestVerificationToken($job)
     {
         $jobPageCurl = new revMyCurl($this->_config->revClaimReferrerUrl.$job["jobID"])->createCurl();
         $jobPage = (string)$jobPageCurl;
@@ -264,7 +264,7 @@ class Rev
             }
 
             $this->revlog("(".$job["jobID"].") Attempting to get request verification token.");
-            $requestVerificationToken = $this->getRequestVerificationToken();
+            $requestVerificationToken = $this->getRequestVerificationToken($job);
 
             if ($requestVerificationToken === null)
             {
