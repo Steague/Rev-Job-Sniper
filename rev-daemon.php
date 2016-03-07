@@ -204,26 +204,16 @@ class Rev
     {
         $jobPageCurl = new revMyCurl($this->_config->revClaimReferrerUrl.$job["jobID"])->createCurl();
         $jobPage = (string)$jobPageCurl;
-        
-        $dom = new DomDocument();
-        $dom->loadHTML($jobPage);
 
-        $form = $dom->getElementById("claim-form");
-        $node = $form->firstChild;
-        $requestVerificationToken = null;
-        while (gettype($node) == "object")
+        $pattern = '/<input name="__RequestVerificationToken" type="hidden" value="([a-zA-Z0-9-_]+)"/';
+        preg_match($pattern, $html, $matches);
+
+        if (!$matches[1])
         {
-            if ($node->getAttribute('name') != "__RequestVerificationToken")
-            {
-                $node = $node->nextSibling;
-                continue;
-            }
-
-            $requestVerificationToken = $node->getAttribute('value');
-            break;
+            return null;
         }
 
-        return $requestVerificationToken;
+        return $matches[1];
     }
 
     /**
