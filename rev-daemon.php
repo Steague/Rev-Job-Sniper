@@ -202,7 +202,8 @@ class Rev
     */
     protected function getRequestVerificationToken($job)
     {
-        $jobPageCurl = new revMyCurl($this->_config->revClaimReferrerUrl.$job["jobID"])->createCurl();
+        $jobPageCurl = new revMyCurl($this->_config->revClaimReferrerUrl.$job["jobID"]);
+        $jobsPageCurl->createCurl();
         $jobPage = (string)$jobPageCurl;
 
         $pattern = '/<input name="__RequestVerificationToken" type="hidden" value="([a-zA-Z0-9-_]+)"/';
