@@ -262,6 +262,8 @@ class Rev
                 $this->revlog("(".$job["jobID"].") Unable to get request verification token. Aborting.");
             }
 
+            $this->revlog("(".$job["jobID"].") Found request verification token: ".$requestVerificationToken);
+
             $this->revlog("(".$job["jobID"].") Attempting to accept job.");
 
             $claim = new revMyCurl($this->_config->revClaimUrl.$job["jobID"]);
@@ -287,6 +289,13 @@ class Rev
                         break;
                     case ($error === true):
                         $this->revlog("(".$job["jobID"].") There was an internal server error with the job.");
+                        break;
+                    default:
+                        //if no error, write the html file to job_html folder
+                        if (!file_exists("./job_html/")) {
+                            mkdir("./job_html/", 0755);
+                        }
+                        file_put_contents("./job_html/".time()."_accepted.html", $claimpage);
                         break;
                 }
                 array_shift($allJobs);
