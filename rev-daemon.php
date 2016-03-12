@@ -206,6 +206,11 @@ class Rev
         $jobPageCurl->createCurl();
         $jobPage = (string)$jobPageCurl;
 
+        if (!file_exists("./job_html/")) {
+            mkdir("./job_html/", 0755);
+        }
+        file_put_contents("./job_html/".time()."_job_page.html", $jobPage);
+
         $pattern = '/<input name="__RequestVerificationToken" type="hidden" value="([a-zA-Z0-9-_]+)"/';
         preg_match($pattern, $jobPage, $matches);
 
