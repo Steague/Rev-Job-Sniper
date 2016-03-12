@@ -290,18 +290,17 @@ class Rev
                     case ($error === true):
                         $this->revlog("(".$job["jobID"].") There was an internal server error with the job.");
                         break;
-                    default:
-                        //if no error, write the html file to job_html folder
-                        if (!file_exists("./job_html/")) {
-                            mkdir("./job_html/", 0755);
-                        }
-                        file_put_contents("./job_html/".time()."_accepted.html", $claimpage);
-                        break;
                 }
                 array_shift($allJobs);
                 sleep(3);
                 continue;
             }
+            //if no error, write the html file to job_html folder
+            if (!file_exists("./job_html/")) {
+                mkdir("./job_html/", 0755);
+            }
+            file_put_contents("./job_html/".time()."_accepted.html", $claimpage);
+
             $this->revlog("Accepted job: ".$job["jobID"].".",true);
             return;
         }
