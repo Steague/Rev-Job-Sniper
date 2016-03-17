@@ -57,7 +57,7 @@ class mycurl
         $this->_referer = $referer;
     }
 
-    public function setCookiFileLocation($path)
+    public function setCookieFileLocation($path)
     {
         $this->_cookieFileLocation = $path;
     }

@@ -203,6 +203,7 @@ class Rev
     protected function getRequestVerificationToken($job)
     {
         $jobPageCurl = new revMyCurl($this->_config->revClaimReferrerUrl.$job["jobID"]);
+        $jobPageCurl->setIncludeHeader(true);
         $jobPageCurl->createCurl();
         $jobPage = (string)$jobPageCurl;
 

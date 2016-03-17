@@ -9,7 +9,7 @@ class revMyCurl extends mycurl
         $config = include('config.php');
 
         $login = new revMyCurl($config['revLoginUrl']);
-            $login->setPost(array(
+        $login->setPost(array(
             "email"      => $config['revEmail'],
             "password"   => $config['revPassword'],
             "rememberMe" => "true"
